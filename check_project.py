@@ -1,4 +1,5 @@
-"""Run this project's full unittest suite from the repository root."""
+"""Run this project's full unittest suite and the identity handoff checks."""
+import subprocess
 import sys
 import unittest
 
@@ -23,7 +24,15 @@ def main():
           f'expected_failures={len(result.expectedFailures)} '
           f'unexpected_successes={len(result.unexpectedSuccesses)} '
           f'result={"PASS" if successful else "FAIL"}')
-    return 0 if successful else 1
+    if not successful:
+        return 1
+    # V2 merge sealing, identity issuance and offline lookup checks.
+    identity = subprocess.run([sys.executable, '-B', 'identity_examples.py'])
+    if identity.returncode != 0:
+        print('IDENTITY CHECK result=FAIL')
+        return identity.returncode
+    print('IDENTITY CHECK result=PASS')
+    return 0
 
 
 if __name__ == '__main__':

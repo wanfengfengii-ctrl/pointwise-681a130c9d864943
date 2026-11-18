@@ -76,6 +76,22 @@ def initialize_replica_schema(replica: sqlite3.Connection) -> None:
                 receipt_id TEXT NOT NULL UNIQUE
             )
         ''')
+        # V2 identity index: published in the same transaction as the report so
+        # a result can only be queried by old number once its evidence is sealed.
+        replica.execute('''
+            CREATE TABLE IF NOT EXISTS restore_identity_results (
+                result_id INTEGER PRIMARY KEY REFERENCES restore_results(result_id)
+            )
+        ''')
+        replica.execute('''
+            CREATE TABLE IF NOT EXISTS restore_identities (
+                result_id INTEGER NOT NULL REFERENCES restore_results(result_id),
+                retired_id TEXT NOT NULL,
+                kept_id TEXT NOT NULL,
+                effective_commit INTEGER NOT NULL,
+                PRIMARY KEY (result_id, retired_id)
+            )
+        ''')
 
 
 def open_replica(path) -> sqlite3.Connection:
@@ -89,7 +105,8 @@ def open_replica(path) -> sqlite3.Connection:
     return replica
 
 
-def publish_report(replica: sqlite3.Connection, draft: ReportDraft, package_id: int, digest: str) -> RestoredReport:
+def publish_report(replica: sqlite3.Connection, draft: ReportDraft, package_id: int, digest: str,
+                   identities=(), identity_result: bool = False) -> RestoredReport:
     with _write(replica):
         cursor = replica.execute('INSERT INTO restore_results (package_id, target, package_digest) VALUES (?, ?, ?)',
                                  (package_id, draft.target, digest))
@@ -103,6 +120,11 @@ def publish_report(replica: sqlite3.Connection, draft: ReportDraft, package_id: 
         ))
         receipt_id = f'restore-{result_id}'
         replica.execute('INSERT INTO restore_receipts VALUES (?, ?)', (result_id, receipt_id))
+        if identity_result:
+            replica.execute('INSERT INTO restore_identity_results VALUES (?)', (result_id,))
+            replica.executemany('INSERT INTO restore_identities VALUES (?, ?, ?, ?)', (
+                (result_id, link.retired_id, link.kept_id, link.effective_commit) for link in identities
+            ))
     receipt = RestoreReceipt(receipt_id, result_id, package_id, draft.target, digest)
     return RestoredReport(result_id, draft.target, draft.rows, draft.totals, receipt)
 
