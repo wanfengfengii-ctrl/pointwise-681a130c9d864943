@@ -1,0 +1,11 @@
+{
+  "partitions": ["A", "B"],
+  "opening_empty_requests": ["opening-1", "opening-2", "opening-3", "opening-4", "opening-5", "opening-6", "opening-7", "opening-8", "opening-9"],
+  "requests": [
+    {"request_id": "station-x", "changes": [{"record_id": "x", "before": null, "after": {"partition": "A", "reading": 17}}]},
+    {"request_id": "route-correction", "changes": [{"record_id": "x", "before": {"partition": "A", "reading": 17}, "after": {"partition": "B", "reading": 17}}]},
+    {"request_id": "lab-correction", "changes": [{"record_id": "x", "before": {"partition": "B", "reading": 17}, "after": {"partition": "B", "reading": 19}}]},
+    {"request_id": "return-correction", "changes": [{"record_id": "x", "before": {"partition": "B", "reading": 19}, "after": {"partition": "A", "reading": 23}}]}
+  ],
+  "follow_up": {"request_id": "next-day-review", "changes": [{"record_id": "x", "before": {"partition": "A", "reading": 23}, "after": {"partition": "A", "reading": 29}}]}
+}

@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "package_id": 71,
+  "target": 13,
+  "origins": [
+    {"snapshot_id": 31, "partition": "A", "cut": 10,
+     "rows": [{"record_id": "x", "partition": "A", "reading": 17}],
+     "totals": {"row_count": 1, "reading_sum": 17}},
+    {"snapshot_id": 32, "partition": "B", "cut": 12,
+     "rows": [{"record_id": "x", "partition": "B", "reading": 19}],
+     "totals": {"row_count": 1, "reading_sum": 19}}
+  ],
+  "commits": [
+    {"number": 11, "change_count": 1, "changes": [
+      {"record_id": "x", "before": {"partition": "A", "reading": 17}, "after": {"partition": "B", "reading": 17}}
+    ]},
+    {"number": 12, "change_count": 1, "changes": [
+      {"record_id": "x", "before": {"partition": "B", "reading": 17}, "after": {"partition": "B", "reading": 19}}
+    ]},
+    {"number": 13, "change_count": 1, "changes": [
+      {"record_id": "x", "before": {"partition": "B", "reading": 19}, "after": {"partition": "A", "reading": 23}}
+    ]}
+  ]
+}
